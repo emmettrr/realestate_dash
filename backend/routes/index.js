@@ -6,6 +6,14 @@ const salesRoutes = require('./salesRoutes');
 
 const router = express.Router();
 
+router.get('/stats', (req, res) => {
+    res.json({
+      totalHomes: 15,
+      totalAgents: 5,
+      totalClients: 30,
+    });
+  });
+
 // Use individual route modules
 router.use('/auth', authRoutes);
 router.use('/homes', homeRoutes);

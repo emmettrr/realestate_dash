@@ -19,4 +19,16 @@ router.post('/upload', auth, role(['agent', 'admin']), upload.single('image'), (
 // Add a new home (agents or admins)
 router.post('/', auth, role(['agent', 'admin']), addHome);
 
+// Get all homes (public access)
+router.get('/', getHomes);  // This route fetches all homes
+
+// Get home by ID (public access)
+router.get('/:id', getHomeById);  // Fetch a specific home by ID
+
+// Update a home (agents or admins)
+router.put('/:id', auth, role(['agent', 'admin']), updateHome);
+
+// Delete a home (agents or admins)
+router.delete('/:id', auth, role(['agent', 'admin']), deleteHome);
+
 module.exports = router;

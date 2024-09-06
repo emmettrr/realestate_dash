@@ -14,15 +14,14 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });
-      setAuth(res.data);  // Update the auth state with user data
-      navigate('/dashboard');  // Redirect to dashboard after login
+      const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });  // Check this URL
+      setAuth(res.data);  // Set auth state on success
+      navigate('/dashboard');  // Redirect to dashboard
     } catch (err) {
-      console.error(err);
-      setError('Invalid login credentials');
+      setError('Invalid email or password');
     }
   };
-
+  
   return (
     <Container maxWidth="sm" style={{ marginTop: '100px' }}>
       <Paper elevation={3} style={{ padding: '20px' }}>
