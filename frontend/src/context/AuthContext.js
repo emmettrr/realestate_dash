@@ -1,20 +1,11 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useState } from 'react';
 
+// Create AuthContext
 export const AuthContext = createContext();
 
+// AuthProvider component
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setAuth(token); // Set auth state to the token if it exists
-    } else {
-      navigate('/'); // Redirect to login if no token is found
-    }
-  }, [navigate]);
+  const [auth, setAuth] = useState(null);  // This state will hold the authentication data
 
   return (
     <AuthContext.Provider value={{ auth, setAuth }}>

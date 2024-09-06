@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/authContext';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import { Container, TextField, Button, Typography } from '@mui/material';
+import { Container, TextField, Button, Typography, Paper } from '@mui/material';  // Import MUI components
 
 const Login = () => {
+  const { setAuth } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,43 +14,45 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token); // Store the JWT token in localStorage
-      navigate('/dashboard'); // Redirect to the dashboard
+      const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });
+      setAuth(res.data);  // Update the auth state with user data
+      navigate('/dashboard');  // Redirect to dashboard after login
     } catch (err) {
-      setError('Invalid email or password');
+      console.error(err);
+      setError('Invalid login credentials');
     }
   };
 
   return (
     <Container maxWidth="sm" style={{ marginTop: '100px' }}>
-      <Typography variant="h4" align="center">Login</Typography>
-      {error && <Typography color="error">{error}</Typography>}
-      <form onSubmit={handleLogin}>
-        <TextField
-          label="Email"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
-          Login
-        </Button>
-      </form>
-      <Typography variant="body2" align="center" style={{ marginTop: '20px' }}>
-        Don't have an account? <Link to="/register">Register Here</Link>
-      </Typography>
+      <Paper elevation={3} style={{ padding: '20px' }}>
+        <Typography variant="h4" align="center" gutterBottom>Login</Typography>
+        {error && <Typography color="error">{error}</Typography>}
+        <form onSubmit={handleLogin}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
+            Login
+          </Button>
+        </form>
+      </Paper>
     </Container>
   );
 };

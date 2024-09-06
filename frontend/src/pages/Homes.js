@@ -9,7 +9,7 @@ const Homes = () => {
 
   useEffect(() => {
     const fetchHomes = async () => {
-      const res = await axios.get('http://localhost:5000/api/homes', {
+      const res = await axios.get('http://localhost:5001/api/homes', {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
         },
@@ -40,7 +40,7 @@ const Homes = () => {
   // Submit the edited home details
   const handleUpdateHome = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/homes/${selectedHome._id}`, selectedHome, {
+      await axios.put(`http://localhost:5001/api/homes/${selectedHome._id}`, selectedHome, {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
         },

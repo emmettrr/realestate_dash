@@ -19,7 +19,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData, {
+      const res = await axios.post('http://localhost:5001/api/auth/register', formData, {
         headers: {
           'x-auth-token': localStorage.getItem('token'), // Admin authentication
         },
@@ -28,7 +28,11 @@ const Register = () => {
       setFormData({ name: '', email: '', password: '', role: '' });
       setError('');
     } catch (err) {
-      setError('Failed to create account. Ensure email is unique.');
+      if (err.response && err.response.status === 400) {
+        setError(err.response.data.message); // Show the exact error message from the backend
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
       setSuccess('');
     }
   };

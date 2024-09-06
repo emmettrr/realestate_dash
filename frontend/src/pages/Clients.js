@@ -9,7 +9,7 @@ const Clients = () => {
 
   useEffect(() => {
     const fetchClients = async () => {
-      const res = await axios.get('http://localhost:5000/api/clients', {
+      const res = await axios.get('http://localhost:5001/api/clients', {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
         },
@@ -40,7 +40,7 @@ const Clients = () => {
   // Submit the edited client details
   const handleUpdateClient = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/clients/${selectedClient._id}`, selectedClient, {
+      await axios.put(`http://localhost:5001/api/clients/${selectedClient._id}`, selectedClient, {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
         },
