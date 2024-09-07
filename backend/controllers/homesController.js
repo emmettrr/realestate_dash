@@ -54,3 +54,29 @@ exports.deleteHome = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+// Get all homes (for agents, only the homes assigned to them)
+exports.getHomes = async (req, res) => {
+  try {
+    const query = req.user.role === 'agent' ? { agent: req.user._id } : {};  // Filter for agents
+    const homes = await Home.find(query).populate('agent', 'name');
+    res.json(homes);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+// Update the status of a home (admin/agent can change status)
+exports.updateHomeStatus = async (req, res) => {
+  try {
+    const { homeId } = req.params;
+    const { status } = req.body;
+    const home = await Home.findByIdAndUpdate(homeId, { status }, { new: true });
+
+    if (!home) return res.status(404).json({ message: 'Home not found' });
+
+    res.json({ message: 'Home status updated successfully', home });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Card, CardContent, Typography } from '@mui/material';
-import axios from 'axios';
+import axios from '../axios';
 
 const Clients = () => {
   const [clients, setClients] = useState([]);

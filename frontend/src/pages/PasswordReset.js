@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, TextField, Typography, Container } from '@mui/material';
-import axios from 'axios';
+import axios from '../axios';
 
 const PasswordReset = () => {
   const [currentPassword, setCurrentPassword] = useState('');

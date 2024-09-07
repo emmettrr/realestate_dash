@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, CircularProgress, MenuItem } from '@mui/material';
-import axios from 'axios';
+import axios from '../axios';
 
 const EditHome = () => {
   const { id } = useParams();

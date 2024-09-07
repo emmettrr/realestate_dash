@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Card, CardContent, Typography, Button, Select, MenuItem } from '@mui/material';
-import axios from 'axios';
+import axios from '../axios';
 import Sidebar from '../components/Sidebar';
-import ProfileDropdown from '../components/ProfileDropdown';
 
 const Dashboard = () => {
   const [homes, setHomes] = useState([]);
@@ -61,10 +60,6 @@ const Dashboard = () => {
 
       {/* Main Content Area */}
       <div style={{ flexGrow: 1, padding: '20px', position: 'relative' }}>
-        {/* Profile Dropdown in the top-right corner */}
-        <div style={{ position: 'absolute', top: 20, right: 20 }}>
-          <ProfileDropdown />
-        </div>
 
         <Container>
           {/* Properties for Sale Section */}

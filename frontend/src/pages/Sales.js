@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from 'axios'; // Assuming you're using regular axios; update this if using custom instance
 import { Container, Typography, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 
 const Sales = () => {
@@ -15,7 +15,7 @@ const Sales = () => {
         });
         setSales(res.data);
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching sales:', err);
       }
     };
 
@@ -38,15 +38,23 @@ const Sales = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sales.map((sale) => (
-            <TableRow key={sale._id}>
-              <TableCell>{sale.home.address}</TableCell>
-              <TableCell>{sale.client.name}</TableCell>
-              <TableCell>{sale.agent.name}</TableCell>
-              <TableCell>${sale.salePrice}</TableCell>
-              <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
+          {sales.length > 0 ? (
+            sales.map((sale) => (
+              <TableRow key={sale._id}>
+                <TableCell>{sale.home?.address || 'N/A'}</TableCell>
+                <TableCell>{sale.client?.name || 'N/A'}</TableCell>
+                <TableCell>{sale.agent?.name || 'N/A'}</TableCell>
+                <TableCell>${sale.salePrice?.toLocaleString()}</TableCell>
+                <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} align="center">
+                No sales data available
+              </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </Container>

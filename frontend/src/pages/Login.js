@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField, Typography, Box, Container } from '@mui/material';
 
@@ -20,6 +20,7 @@ const Login = () => {
       // Store token and name in localStorage
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('name', res.data.name);
+      localStorage.setItem('role', res.data.role);
   
       // Navigate to dashboard
       navigate('/dashboard');
