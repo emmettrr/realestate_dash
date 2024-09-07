@@ -1,131 +1,131 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Grid, Card, CardContent, Typography, CircularProgress, CardMedia, Button, IconButton } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { Container, Grid, Card, CardContent, Typography, Button, Select, MenuItem } from '@mui/material';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import ProfileDropdown from '../components/ProfileDropdown';
 
 const Dashboard = () => {
   const [homes, setHomes] = useState([]);
-  const [prospectiveHomes, setProspectiveHomes] = useState([]);
-  const [prospectiveClients, setProspectiveClients] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(true);  // Assuming admin access for now
-  const [loading, setLoading] = useState(true);  // Add loading state
-  const [error, setError] = useState('');        // Add error state
+  const [lots, setLots] = useState([]);
+  const [interestedClients, setInterestedClients] = useState([]);
+  const [agents, setAgents] = useState([]);  // List of available agents
+  const [isAdmin, setIsAdmin] = useState(false);  // Assume a way to check if the user is an admin
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [homesRes, prospectiveHomesRes, prospectiveClientsRes, statsRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/homes'),
-          axios.get('http://localhost:5001/api/prospective-homes'),
-          axios.get('http://localhost:5001/api/prospective-clients'),
-          axios.get('http://localhost:5001/api/stats')
-        ]);
+        const homesRes = await axios.get('http://localhost:5001/api/homes');
+        const lotsRes = await axios.get('http://localhost:5001/api/lots');
+        const clientsRes = await axios.get('http://localhost:5001/api/interested-clients');
+        const agentsRes = await axios.get('http://localhost:5001/api/agents');  // Fetch agents
 
         setHomes(homesRes.data);
-        setProspectiveHomes(prospectiveHomesRes.data);
-        setProspectiveClients(prospectiveClientsRes.data);
-        setStats(statsRes.data);
-        setLoading(false);  // Stop loading once data is fetched
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load data. Please try again later.');
-        setLoading(false);  // Stop loading even if there's an error
+        setLots(lotsRes.data);
+        setInterestedClients(clientsRes.data);
+        setAgents(agentsRes.data);
+
+        // Check if the user is an admin (you can fetch this from API or check from token)
+        const token = localStorage.getItem('token');
+        if (token) {
+          // Assuming you store role in the token or user data
+          const userRole = JSON.parse(atob(token.split('.')[1])).role;
+          setIsAdmin(userRole === 'admin');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     };
 
     fetchData();
   }, []);
 
-  const handleDelete = async (id) => {
+  // Function to handle assigning an agent to a property
+  const handleAssignAgent = async (propertyId, agentId, propertyType) => {
     try {
-      await axios.delete(`http://localhost:5001/api/homes/${id}`);
-      setHomes(homes.filter(home => home.id !== id));
-    } catch (err) {
-      console.error(err);
+      await axios.post(`http://localhost:5001/api/properties/assign-agent`, {
+        propertyId,
+        agentId,
+        propertyType
+      });
+      alert('Agent assigned successfully');
+    } catch (error) {
+      console.error('Error assigning agent:', error);
+      alert('Error assigning agent');
     }
   };
 
-  if (loading) {
-    return <CircularProgress />;  // Show loading spinner while data is being fetched
-  }
-
-  if (error) {
-    return <Typography variant="h6" color="error">{error}</Typography>;  // Show error message if there's an error
-  }
-
   return (
-    <Container>
-      <Grid container spacing={3}>
-        {/* Metrics Section */}
-        {stats && (
-          <>
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5">Total Properties</Typography>
-                  <Typography variant="h4">{stats.totalProperties}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5">Total Clients</Typography>
-                  <Typography variant="h4">{stats.totalClients}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5">Deals Closed</Typography>
-                  <Typography variant="h4">{stats.dealsClosed}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </>
-        )}
+    <div style={{ display: 'flex' }}>
+      {/* Sidebar */}
+      <Sidebar />
 
-        {/* Homes/Lots for Sale */}
-        <Grid item xs={12}>
-          <Typography variant="h5" gutterBottom>Homes/Lots for Sale</Typography>
+      {/* Main Content Area */}
+      <div style={{ flexGrow: 1, padding: '20px', position: 'relative' }}>
+        {/* Profile Dropdown in the top-right corner */}
+        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+          <ProfileDropdown />
+        </div>
+
+        <Container>
+          {/* Properties for Sale Section */}
+          <Typography variant="h5" gutterBottom>Properties for Sale (Homes & Lots)</Typography>
           <Grid container spacing={3}>
             {homes.map((home) => (
               <Grid item xs={12} sm={6} md={4} key={home.id}>
-                <Card>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={home.image}
-                    alt={home.name}
-                  />
+                <Card sx={{ backgroundColor: '#1e1e2f', color: '#ffffff' }}>
                   <CardContent>
                     <Typography variant="h6">{home.name}</Typography>
                     <Typography>Price: ${home.price.toLocaleString()}</Typography>
                     <Typography>Address: {home.address}</Typography>
-                    <Typography>Agent: {home.agent.name}</Typography>
 
+                    {/* Show Assign Agent Option if user is an Admin */}
                     {isAdmin && (
                       <>
-                        <Button
-                          component={Link}
-                          to={`/edit-home/${home.id}`}
-                          variant="contained"
-                          color="primary"
-                          startIcon={<Edit />}
-                          sx={{ marginTop: 1 }}
+                        <Typography variant="body1" sx={{ marginTop: 2 }}>Assign Agent</Typography>
+                        <Select
+                          defaultValue=""
+                          onChange={(e) => handleAssignAgent(home.id, e.target.value, 'home')}
+                          displayEmpty
+                          fullWidth
                         >
-                          Edit
-                        </Button>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDelete(home.id)}
-                          sx={{ marginLeft: 2 }}
+                          <MenuItem value="" disabled>Select Agent</MenuItem>
+                          {agents.map((agent) => (
+                            <MenuItem key={agent.id} value={agent.id}>
+                              {agent.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+            {lots.map((lot) => (
+              <Grid item xs={12} sm={6} md={4} key={lot.id}>
+                <Card sx={{ backgroundColor: '#1e1e2f', color: '#ffffff' }}>
+                  <CardContent>
+                    <Typography variant="h6">{lot.name}</Typography>
+                    <Typography>Price: ${lot.price.toLocaleString()}</Typography>
+                    <Typography>Location: {lot.location}</Typography>
+
+                    {/* Show Assign Agent Option if user is an Admin */}
+                    {isAdmin && (
+                      <>
+                        <Typography variant="body1" sx={{ marginTop: 2 }}>Assign Agent</Typography>
+                        <Select
+                          defaultValue=""
+                          onChange={(e) => handleAssignAgent(lot.id, e.target.value, 'lot')}
+                          displayEmpty
+                          fullWidth
                         >
-                          <Delete />
-                        </IconButton>
+                          <MenuItem value="" disabled>Select Agent</MenuItem>
+                          {agents.map((agent) => (
+                            <MenuItem key={agent.id} value={agent.id}>
+                              {agent.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </>
                     )}
                   </CardContent>
@@ -133,45 +133,29 @@ const Dashboard = () => {
               </Grid>
             ))}
           </Grid>
-        </Grid>
 
-        {/* Prospective Homes/Lots */}
-        <Grid item xs={12} sx={{ marginTop: 4 }}>
-          <Typography variant="h5" gutterBottom>Prospective Homes/Lots</Typography>
-          <Grid container spacing={3}>
-            {prospectiveHomes.map((home) => (
-              <Grid item xs={12} sm={6} md={4} key={home.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{home.name}</Typography>
-                    <Typography>Estimated Price: ${home.estimatedPrice.toLocaleString()}</Typography>
-                    <Typography>Location: {home.location}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Grid>
-
-        {/* Prospective Clients */}
-        <Grid item xs={12} sx={{ marginTop: 4 }}>
-          <Typography variant="h5" gutterBottom>Prospective Clients</Typography>
-          <Grid container spacing={3}>
-            {prospectiveClients.map((client) => (
-              <Grid item xs={12} sm={6} md={4} key={client.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{client.name}</Typography>
-                    <Typography>Email: {client.email}</Typography>
-                    <Typography>Interested In: {client.interestedIn}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Grid>
-      </Grid>
-    </Container>
+          {/* Interested Clients Section */}
+          <Typography variant="h5" sx={{ marginTop: 4 }}>Interested Clients</Typography>
+          {interestedClients.length > 0 ? (
+            <Grid container spacing={3}>
+              {interestedClients.map((client) => (
+                <Grid item xs={12} sm={6} md={4} key={client.id}>
+                  <Card sx={{ backgroundColor: '#1e1e2f', color: '#ffffff' }}>
+                    <CardContent>
+                      <Typography variant="h6">{client.name}</Typography>
+                      <Typography>Email: {client.email}</Typography>
+                      <Typography>Interested in: {client.interestedIn}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Typography>No clients are currently interested in any properties.</Typography>
+          )}
+        </Container>
+      </div>
+    </div>
   );
 };
 

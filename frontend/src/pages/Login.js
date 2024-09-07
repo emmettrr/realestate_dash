@@ -1,11 +1,9 @@
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/authContext';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Paper } from '@mui/material';  // Import MUI components
+import { useNavigate } from 'react-router-dom';
+import { Button, TextField, Typography, Box, Container } from '@mui/material';
 
 const Login = () => {
-  const { setAuth } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,45 +11,85 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+  
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });  // Check this URL
-      setAuth(res.data);  // Set auth state on success
-      navigate('/dashboard');  // Redirect to dashboard
+      const res = await axios.post('http://localhost:5001/api/auth/login', {
+        email,
+        password,
+      });
+  
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('name', res.data.name);
+  
+      navigate('/dashboard');
     } catch (err) {
-      setError('Invalid email or password');
+      if (err.response && err.response.data) {
+        setError(err.response.data.message);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+      console.error('Login error:', err);
     }
   };
-  
+
   return (
-    <Container maxWidth="sm" style={{ marginTop: '100px' }}>
-      <Paper elevation={3} style={{ padding: '20px' }}>
-        <Typography variant="h4" align="center" gutterBottom>Login</Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        <form onSubmit={handleLogin}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
-            Login
-          </Button>
-        </form>
-      </Paper>
+    <Container
+      maxWidth="sm"
+      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}
+    >
+      <Box sx={{ width: '100%', textAlign: 'center', marginBottom: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>  
+          Login
+        </Typography>
+      </Box>
+      <Box component="form" onSubmit={handleLogin} sx={{ width: '100%' }}>
+        <TextField
+          label="Email"
+          variant="outlined"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{
+            input: { color: 'text.primary' },  
+            label: { color: 'text.secondary' },  
+            backgroundColor: 'background.paper',  
+            borderRadius: 1,
+          }}
+        />
+        <TextField
+          label="Password"
+          variant="outlined"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{
+            input: { color: 'text.primary' },
+            label: { color: 'text.secondary' },
+            backgroundColor: 'background.paper',
+            borderRadius: 1,
+          }}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          sx={{
+            marginTop: 2,
+            padding: '10px',
+            backgroundColor: 'primary.main',
+            '&:hover': {
+              backgroundColor: 'primary.dark',
+            },
+          }}
+        >
+          Login
+        </Button>
+        {error && <Typography color="error" sx={{ marginTop: 2 }}>{error}</Typography>}
+      </Box>
     </Container>
   );
 };

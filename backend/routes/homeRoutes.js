@@ -1,11 +1,11 @@
 const express = require('express');
-const { addHome, getHomes, getHomeById, updateHome, deleteHome } = require('../controllers/homesController');
+const { addHome, getHomes, getHomeById, updateHome, deleteHome } = require('../controllers/homesController'); // Ensure functions are imported
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 const upload = require('../middleware/upload');
 const router = express.Router();
 
-// Upload home image (for agents or admins)
+// Properly defined routes
 router.post('/upload', auth, role(['agent', 'admin']), upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
@@ -16,19 +16,10 @@ router.post('/upload', auth, role(['agent', 'admin']), upload.single('image'), (
   });
 });
 
-// Add a new home (agents or admins)
+// Make sure the addHome function is properly imported and used
 router.post('/', auth, role(['agent', 'admin']), addHome);
 
-// Get all homes (public access)
-router.get('/', getHomes);  // This route fetches all homes
-
-// Get home by ID (public access)
-router.get('/:id', getHomeById);  // Fetch a specific home by ID
-
-// Update a home (agents or admins)
-router.put('/:id', auth, role(['agent', 'admin']), updateHome);
-
-// Delete a home (agents or admins)
-router.delete('/:id', auth, role(['agent', 'admin']), deleteHome);
+// Other routes...
+router.put('/homes/:homeId/update', auth, role(['agent', 'admin']), updateHome);
 
 module.exports = router;

@@ -1,23 +1,35 @@
-import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+const Clients = () => {
+  const [clients, setClients] = useState([]);
 
-const TrafficSourceChart = () => {
-  const data = {
-    labels: ['Desktop', 'Tablet', 'Phone'],
-    datasets: [
-      {
-        label: '# of Visits',
-        data: [63, 15, 22],
-        backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
-        hoverOffset: 4,
-      },
-    ],
+  const fetchClients = async () => {
+    try {
+      const res = await axios.get('http://localhost:5001/api/clients');
+      setClients(res.data);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
   };
 
-  return <Pie data={data} />;
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  return (
+    <div>
+      <h2>Clients</h2>
+      {clients.map((client) => (
+        <div key={client.id}>
+          <h3>{client.name}</h3>
+          <p>Email: {client.email}</p>
+          <p>Interested in: {client.interestedIn}</p>
+          <p>Tour Status: {client.tourStatus}</p>
+        </div>
+      ))}
+    </div>
+  );
 };
 
-export default TrafficSourceChart;
+export default Clients;

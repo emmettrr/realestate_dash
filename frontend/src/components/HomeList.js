@@ -1,22 +1,36 @@
-import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+const HomeList = () => {
+  const [homes, setHomes] = useState([]);
 
-const SalesChart = () => {
-  const data = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [12000, 15000, 18000, 22000, 24000, 27000, 30000, 35000, 40000, 45000, 47000, 50000],
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ],
+  const fetchHomes = async () => {
+    try {
+      const res = await axios.get('http://localhost:5001/api/homes');
+      setHomes(res.data);
+    } catch (error) {
+      console.error('Error fetching homes:', error);
+    }
   };
 
-  return <Bar data={data} />;
+  useEffect(() => {
+    fetchHomes();
+  }, []);
+
+  return (
+    <div>
+      <h2>Homes for Sale</h2>
+      {homes.map((home) => (
+        <div key={home.id}>
+          <img src={home.image} alt={home.name} />
+          <h3>{home.name}</h3>
+          <p>Price: ${home.price}</p>
+          <p>Address: {home.address}</p>
+          <p>Agent: {home.agent}</p>
+        </div>
+      ))}
+    </div>
+  );
 };
 
-export default SalesChart;
+export default HomeList;

@@ -1,83 +1,56 @@
-const Home = require('../models/Home');
+const homes = [
+  { id: 1, name: 'Home 1', price: 500000, address: '123 Main St', agent: '' },
+  { id: 2, name: 'Home 2', price: 750000, address: '456 Oak St', agent: '' },
+  { id: 3, name: 'Home 3', price: 600000, address: '789 Pine St', agent: '' },
+];
 
-// Add a new home (for admin or agent)
-exports.addHome = async (req, res) => {
-  const { address, price } = req.body;
+// Add Home controller function
+const addHome = (req, res) => {
+  const { name, price, address, mls, image } = req.body;
 
-  try {
-    const home = new Home({
-      address,
-      price,
-      agent: req.user.userId, // The agent who adds the home
-    });
+  // Generate a new home ID
+  const newHome = {
+    id: homes.length + 1,
+    name,
+    price,
+    address,
+    mls,
+    image,
+    agent: '', // Initial agent is not assigned
+  };
 
-    await home.save();
-    res.status(201).json(home);
-  } catch (err) {
-    res.status(500).json({ message: 'Error adding home' });
-  }
+  // Add the new home to the homes array
+  homes.push(newHome);
+
+  // Return the newly created home
+  res.status(201).json({ message: 'Home added successfully', home: newHome });
 };
 
-// Get all homes (admin and agents can see all homes)
-exports.getHomes = async (req, res) => {
-  try {
-    const homes = await Home.find().populate('agent', 'name email'); // Populate agent details
-    res.status(200).json(homes);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching homes' });
+// Update Home controller function
+const updateHome = (req, res) => {
+  const { homeId } = req.params;
+  const { name, price, address, mls, image, agent } = req.body;
+
+  // Find the home by ID
+  const home = homes.find((home) => home.id === parseInt(homeId));
+  if (!home) {
+    return res.status(404).json({ message: 'Home not found' });
   }
+
+  // Update the home details
+  home.name = name || home.name;
+  home.price = price || home.price;
+  home.address = address || home.address;
+  home.mls = mls || home.mls;
+  home.image = image || home.image;
+  home.agent = agent || home.agent;
+
+  res.json({ message: 'Home updated successfully', home });
 };
 
-// Get a single home by ID
-exports.getHomeById = async (req, res) => {
-  try {
-    const home = await Home.findById(req.params.id).populate('agent', 'name email');
-    if (!home) return res.status(404).json({ message: 'Home not found' });
-    res.json(home);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching home' });
-  }
+// Get All Homes
+const getHomes = (req, res) => {
+  res.json(homes);
 };
 
-// Update a home's details (admin and the assigned agent can update)
-exports.updateHome = async (req, res) => {
-  try {
-    const home = await Home.findById(req.params.id);
-
-    if (!home) return res.status(404).json({ message: 'Home not found' });
-
-    // Check if the user is admin or the assigned agent
-    if (home.agent.toString() !== req.user.userId && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
-    const updatedHome = await Home.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true }
-    );
-
-    res.json(updatedHome);
-  } catch (err) {
-    res.status(500).json({ message: 'Error updating home' });
-  }
-};
-
-// Delete a home (admin only)
-exports.deleteHome = async (req, res) => {
-  try {
-    const home = await Home.findById(req.params.id);
-
-    if (!home) return res.status(404).json({ message: 'Home not found' });
-
-    // Only admins can delete a home
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
-
-    await home.remove();
-    res.json({ message: 'Home removed' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error deleting home' });
-  }
-};
+module.exports = { addHome, updateHome, getHomes };

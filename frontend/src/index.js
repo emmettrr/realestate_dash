@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/authContext';
+import App from './App';
 
 ReactDOM.render(
-  <AuthProvider>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </AuthProvider>,
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
   document.getElementById('root')
 );
