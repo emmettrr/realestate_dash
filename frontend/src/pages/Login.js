@@ -11,20 +11,21 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
     try {
       const res = await axios.post('http://localhost:5001/api/auth/login', {
         email,
         password,
       });
   
+      // Store token and name in localStorage
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('name', res.data.name);
   
+      // Navigate to dashboard
       navigate('/dashboard');
     } catch (err) {
       if (err.response && err.response.data) {
-        setError(err.response.data.message);
+        setError(err.response.data.message); // Show error message from server
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -38,7 +39,7 @@ const Login = () => {
       sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}
     >
       <Box sx={{ width: '100%', textAlign: 'center', marginBottom: 4 }}>
-        <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>  
+        <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>  {/* Use text color from theme */}
           Login
         </Typography>
       </Box>
@@ -52,9 +53,9 @@ const Login = () => {
           fullWidth
           margin="normal"
           sx={{
-            input: { color: 'text.primary' },  
-            label: { color: 'text.secondary' },  
-            backgroundColor: 'background.paper',  
+            input: { color: 'text.primary' },  // Adapt input color
+            label: { color: 'text.secondary' },  // Adapt label color
+            backgroundColor: 'background.paper',  // Adapt background
             borderRadius: 1,
           }}
         />

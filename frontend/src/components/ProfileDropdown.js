@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Menu, MenuItem, IconButton, Avatar, Switch, Typography } from '@mui/material';
+import { ThemeContext } from '../ThemeContext';  // Assuming you have a ThemeContext for dark mode
+import { useNavigate } from 'react-router-dom';
 
 const ProfileDropdown = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
   const [name, setName] = useState('');
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);  // Assuming ThemeContext manages dark mode
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userName = localStorage.getItem('name');
@@ -21,12 +24,10 @@ const ProfileDropdown = () => {
     setAnchorEl(null);
   };
 
-  const handleDarkModeToggle = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode);
-    // Apply theme changes by reloading, but do not route to login
-    window.location.reload();
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    navigate('/login');  // Redirect to login page after logout
   };
 
   return (
@@ -54,13 +55,13 @@ const ProfileDropdown = () => {
           <Typography variant="body1">Dark Mode</Typography>
           <Switch
             checked={darkMode}
-            onChange={handleDarkModeToggle}
+            onChange={toggleDarkMode}  // Toggle without page reload
             color="primary"
           />
         </MenuItem>
 
         {/* Logout Option */}
-        <MenuItem>
+        <MenuItem onClick={handleLogout}>
           <Typography variant="body1">Logout</Typography>
         </MenuItem>
       </Menu>

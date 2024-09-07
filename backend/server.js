@@ -9,25 +9,22 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Connect to database
 connectDB();
 
+// Apply middleware
 app.use(express.json());
-
 app.use(cors({
-  origin: 'http://localhost:3000',  // Allow requests from this origin (your frontend)
-  credentials: true,                // Allow credentials (e.g., cookies, authentication)
+  origin: 'http://localhost:3000',  // Allow requests from your frontend
+  credentials: true                 // Allow credentials like cookies
 }));
 
-app.options('*', cors());
+// Routes
+app.use('/api/auth', authRoutes);           // Authentication routes
+app.use('/api/homes', homesRoutes);         // Homes and lots routes (use /api/homes)
+app.use('/api/clients', clientsRoutes);     // Clients routes
 
-app.use('/api/auth', authRoutes);
-
-app.use(cors());
-app.use(express.json());
-
-app.use('/api', homesRoutes);     // Route for homes and lots
-app.use('/api/clients', clientsRoutes);  // Route for clients
-
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
+// Define the Home schema
 const HomeSchema = new mongoose.Schema({
-  address: {
+  name: {
     type: String,
     required: true,
   },
@@ -9,19 +10,15 @@ const HomeSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  status: {
+  address: {
     type: String,
-    enum: ['available', 'sold'],
-    default: 'available',
+    required: true,
   },
   agent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference the agent (user)
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    type: String,
+    default: '',
   },
 });
 
+// Create and export the Home model
 module.exports = mongoose.model('Home', HomeSchema);

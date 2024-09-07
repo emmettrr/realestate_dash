@@ -1,35 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom'; // No need for BrowserRouter here
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles'; // Use MUI's ThemeProvider
 import { CssBaseline } from '@mui/material';
-import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
-import ProfileDropdown from './components/ProfileDropdown';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Homes from './pages/Homes';
 import Clients from './pages/Clients';
 import Sales from './pages/Sales';
 import PasswordReset from './pages/PasswordReset';
+import { ThemeContext } from './ThemeContext'; // Assuming you have a ThemeContext
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+  const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for token in localStorage to persist login
     const token = localStorage.getItem('token');
     if (token) {
       setIsAuthenticated(true);
     } else {
-      setIsAuthenticated(false);
+      navigate('/login'); // Redirect to login if no token is found
     }
 
-    const storedDarkMode = localStorage.getItem('darkMode');
-    if (storedDarkMode !== null) {
-      setDarkMode(storedDarkMode === 'true');
-    }
-  }, []);
+    // Load dark mode preference from localStorage
+    const storedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(storedDarkMode);
+  }, [navigate]);
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode);
+  };
+
+  // Create a dynamic MUI theme based on darkMode
   const theme = createTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',
@@ -45,15 +52,25 @@ const App = () => {
     },
   });
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Remove token from localStorage
+    setIsAuthenticated(false);
+    navigate('/login'); // Redirect to login page
+  };
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
         <Routes>
           {/* Public Route for Login */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
 
-          {/* Protected Routes with Layout */}
-          <Route path="/" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={isAuthenticated ? <Layout handleLogout={handleLogout} /> : <Navigate to="/login" />}
+          >
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="homes" element={<Homes />} />
             <Route path="clients" element={<Clients />} />
@@ -61,7 +78,8 @@ const App = () => {
             <Route path="reset-password" element={<PasswordReset />} />
           </Route>
         </Routes>
-    </ThemeProvider>
+      </MuiThemeProvider>
+    </ThemeContext.Provider>
   );
 };
 
